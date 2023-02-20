@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaUser } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { register, reset } from "../features/auth/authSlice";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +14,24 @@ const Register = () => {
   });
 
   const { name, email, password, password2 } = formData;
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user, isSuccess, isError, message } = useSelector(
+    state => state.auth
+  );
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+    }
+
+    if (isSuccess && user) {
+      navigate("/");
+    }
+
+    dispatch(reset);
+  }, [isError, isSuccess, user, message, navigate, dispatch]);
 
   const onChange = e => {
     setFormData(prevState => ({
@@ -25,6 +46,9 @@ const Register = () => {
     if (password !== password2) {
       toast.error("Passwords do not match");
     }
+
+    const userData = { name, email, password };
+    dispatch(register(userData));
   };
 
   return (
